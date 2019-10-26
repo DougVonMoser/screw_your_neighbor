@@ -41,8 +41,8 @@ initialModel =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init x =
     ( initialModel, Cmd.none )
 
 
@@ -147,7 +147,7 @@ sendDeal dealt myIdx =
             Json.Encode.object
                 [ ( "playerIdx", Json.Encode.int myIdx )
                 , ( "move", Json.Encode.string "Deal" )
-                , ( "newCards", Json.Encode.array (decodeDealt dealt) )
+                , ( "newCards", Json.Encode.array decodeDealt dealt )
                 ]
 
         jsonstringified =
@@ -193,16 +193,14 @@ sendSwitch myIdx nextTurnIdx myCard dealt =
                         -- shit, i need to stop using maybes in dealt. it fucks things up
                         , ( "newCards"
                           , Json.Encode.array
-                                (Array.map
-                                    (\x ->
-                                        Json.Encode.object
-                                            [ ( "suit", Json.Encode.string x.suit )
-                                            , ( "number", Json.Encode.int x.number )
-                                            , ( "svgDisplayVal", Json.Encode.string x.svgDisplayVal )
-                                            ]
-                                    )
-                                    updatedAgain
+                                (\x ->
+                                    Json.Encode.object
+                                        [ ( "suit", Json.Encode.string x.suit )
+                                        , ( "number", Json.Encode.int x.number )
+                                        , ( "svgDisplayVal", Json.Encode.string x.svgDisplayVal )
+                                        ]
                                 )
+                                updatedAgain
                           )
                         ]
 
@@ -215,17 +213,13 @@ sendSwitch myIdx nextTurnIdx myCard dealt =
             Cmd.none
 
 
-decodeDealt : Array.Array Card -> Array.Array Json.Encode.Value
-decodeDealt dealt =
-    Array.map
-        (\x ->
-            Json.Encode.object
-                [ ( "suit", Json.Encode.string x.suit )
-                , ( "number", Json.Encode.int x.number )
-                , ( "svgDisplayVal", Json.Encode.string x.svgDisplayVal )
-                ]
-        )
-        dealt
+decodeDealt =
+    \x ->
+        Json.Encode.object
+            [ ( "suit", Json.Encode.string x.suit )
+            , ( "number", Json.Encode.int x.number )
+            , ( "svgDisplayVal", Json.Encode.string x.svgDisplayVal )
+            ]
 
 
 sendStay : Int -> Array.Array Card -> Cmd msg
@@ -237,7 +231,8 @@ sendStay playerIdx dealt =
                 , ( "move", Json.Encode.string "Stay" )
                 , ( "newCards"
                   , Json.Encode.array
-                        (decodeDealt dealt)
+                        decodeDealt
+                        dealt
                   )
                 ]
 
