@@ -3,7 +3,10 @@
 require("./styles.scss");
 
 const {Elm} = require('./Main');
-var app = Elm.Main.init({flags: 6});
+var app = Elm.Main.init({
+    flags: 6,
+    node: document.getElementById("elm-node")
+});
 
 app.ports.toJs.subscribe(data => {
     console.log(data);
