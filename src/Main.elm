@@ -259,7 +259,7 @@ sendStay playerIdx dealt =
 
 sendStringToServer : String -> Cmd msg
 sendStringToServer =
-    send "ws://localhost:8080"
+    WebSocket.sendString "ws://localhost:8080"
 
 
 send x y =

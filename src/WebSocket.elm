@@ -32,11 +32,11 @@ connect url protocols =
 
 {-| Requests a string to be sent out on the provided socket connection.
 -}
-sendString : ConnectionInfo -> String -> Cmd msg
-sendString connection text =
+sendString : String -> String -> Cmd msg
+sendString url text =
     message "sendString"
         (Encode.object
-            [ ( "url", Encode.string connection.url )
+            [ ( "url", Encode.string url )
             , ( "message", Encode.string text )
             ]
         )
