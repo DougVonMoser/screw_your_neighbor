@@ -429,12 +429,13 @@ subscriptions model =
                 WebSocket.Connected info ->
                     SocketConnect info
 
+                WebSocket.StringMessage info message ->
+                    Incoming message
+
                 _ ->
                     NOOP
          {-
 
-            WebSocket.StringMessage info message ->
-                RecievedString message
 
             WebSocket.Closed _ unsentBytes ->
                 SocketClosed unsentBytes
