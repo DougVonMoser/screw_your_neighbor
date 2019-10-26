@@ -11,6 +11,7 @@ import Json.Encode exposing (encode, object)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (height, id, width, x, y)
+import Websocket exposing (Event(..))
 
 
 type Stage
