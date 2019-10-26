@@ -5,7 +5,7 @@
 export function bind(app) {
   // Exit predictably if the ports aren't in use in Elm
   if (!app.ports || !(app.ports.toSocket && app.ports.fromSocket)) {
-    console.log(
+    console.error(
       "Could not find 'toSocket' and 'fromSocket' ports on app. They may not be in use yet."
     );
     return;

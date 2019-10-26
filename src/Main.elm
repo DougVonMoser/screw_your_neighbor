@@ -11,7 +11,7 @@ import Json.Encode exposing (encode, object)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (height, id, width, x, y)
-import Websocket exposing (Event(..))
+import WebSocket exposing (Event(..))
 
 
 type Stage
@@ -27,7 +27,14 @@ type alias Model =
     , dealerIdx : Int -- index of the dealer, as sitting in dealt
     , turnIdx : Int
     , serverHeadsUp : String
+    , socketInfo : SocketStatus
     }
+
+
+type SocketStatus
+    = Unopened
+    | Connected WebSocket.ConnectionInfo
+    | Closed Int
 
 
 initialModel : Model
@@ -39,15 +46,17 @@ initialModel =
     , dealerIdx = 0
     , turnIdx = 1
     , serverHeadsUp = "nohting yet"
+    , socketInfo = Unopened
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init x =
-    ( initialModel, Cmd.none )
+    ( initialModel, WebSocket.connect "ws://localhost:8080" [] )
 
 
 
+--WebSocket.listen "ws://localhost:8080" Incoming
 -- UPDATE
 
 
@@ -57,6 +66,8 @@ type Msg
     | TypingName String
     | SelectSeat
     | RandomInt Int
+    | SocketConnect WebSocket.ConnectionInfo
+    | NOOP
 
 
 type Move
@@ -122,8 +133,11 @@ update message model =
             in
             ( newModel, sendDeal newModel.dealt myIdx )
 
-        ( _, Nothing ) ->
-            ( model, Cmd.none )
+        ( SocketConnect socketInfo, _ ) ->
+            ( { model | socketInfo = Connected socketInfo }, Cmd.none )
+
+        ( _, _ ) ->
+            ( Debug.log "HERE BE DEMONS" model, Cmd.none )
 
 
 addCardsToDealt : Model -> Int -> Model
@@ -409,7 +423,29 @@ getNextTurn current totalPlayers =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     --WebSocket.listen "ws://localhost:8080" Incoming
-    Sub.none
+    WebSocket.events
+        (\event ->
+            case event of
+                WebSocket.Connected info ->
+                    SocketConnect info
+
+                _ ->
+                    NOOP
+         {-
+
+            WebSocket.StringMessage info message ->
+                RecievedString message
+
+            WebSocket.Closed _ unsentBytes ->
+                SocketClosed unsentBytes
+
+            WebSocket.Error _ code ->
+                Error ("WebSocket Error: " ++ String.fromInt code)
+
+            WebSocket.BadMessage error ->
+                Error error
+         -}
+        )
 
 
 
