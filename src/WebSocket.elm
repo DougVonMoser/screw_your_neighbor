@@ -65,7 +65,7 @@ type Event
     | BadMessage String
 
 
-events : (Event -> msg) -> Sub msg
+events : (Event -> a) -> Sub a
 events msg =
     fromSocket
         (\val ->

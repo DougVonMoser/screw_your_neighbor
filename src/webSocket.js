@@ -95,7 +95,7 @@ function messageHandler(toElm, socket, url, event) {
     // and send it to Elm. https://developer.mozilla.org/en-US/docs/Web/API/File/File
     // Unfortunately, there is no direct way to send binary data from Elm
     // to JS, so some sort of string encoding would have to be used
-    console.log(`No binary message handling implemented`);
+    console.error(`No binary message handling implemented`);
   }
 }
 
