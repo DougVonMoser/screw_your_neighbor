@@ -1,6 +1,8 @@
 'use strict';
 
 require("./styles.scss");
+import "./assets/svg-cards.svg"
+
 
 import { bind } from "./webSocket.js";
 

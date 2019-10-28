@@ -67,14 +67,8 @@ var common = {
                 }
             },
             {
-                test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                exclude: [/elm-stuff/, /node_modules/],
-                loader: "file-loader"
-            },
-            {
-                test: /\.(jpe?g|png|gif|svg)$/i,
-                exclude: [/elm-stuff/, /node_modules/],
-                loader: "file-loader"
+                test: /\.svg$/,
+                use: 'svg-sprite-loader'
             }
         ]
     }

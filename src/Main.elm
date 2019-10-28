@@ -19,6 +19,12 @@ type Stage
     | Play
 
 
+type SocketStatus
+    = Unopened
+    | Connected WebSocket.ConnectionInfo
+    | Closed Int
+
+
 type alias Model =
     { players : Array.Array String --names of players! fun!
     , dealt : Array.Array Card -- array of cards
@@ -29,12 +35,6 @@ type alias Model =
     , serverHeadsUp : String
     , socketInfo : SocketStatus
     }
-
-
-type SocketStatus
-    = Unopened
-    | Connected WebSocket.ConnectionInfo
-    | Closed Int
 
 
 initialModel : Model
@@ -56,7 +56,6 @@ init x =
 
 
 
---WebSocket.listen "ws://localhost:8080" Incoming
 -- UPDATE
 
 
@@ -344,7 +343,7 @@ handleIncoming payload model playerCount =
                                 "Stay" ->
                                     { model
                                         | turnIdx = getNextTurn model.turnIdx playerCount
-                                        , serverHeadsUp = playerThatMoved ++ " stayed!"
+                                        , serverHeadsUp = playerThatMoved ++ " stayed!!!!"
                                     }
 
                                 "Switch" ->
