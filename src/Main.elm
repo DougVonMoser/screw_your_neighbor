@@ -421,7 +421,6 @@ getNextTurn current totalPlayers =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    --WebSocket.listen "ws://localhost:8080" Incoming
     WebSocket.events
         (\event ->
             case event of
@@ -454,6 +453,24 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
+    div []
+        [ socketView model.socketInfo
+        , playView model
+        ]
+
+
+socketView : SocketStatus -> Html Msg
+socketView status =
+    case status of
+        Unopened ->
+            div [] [ Html.text "opening socket..." ]
+
+        _ ->
+            Html.text ""
+
+
+playView : Model -> Html Msg
+playView model =
     case model.myIdx of
         Just myIdx ->
             if Array.length model.dealt == 0 then
@@ -501,7 +518,7 @@ viewStatus myIdx model =
     let
         status =
             if model.turnIdx == myIdx then
-                "my turn"
+                "~my turn~"
 
             else
                 case get model.turnIdx model.players of
