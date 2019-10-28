@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode exposing (..)
 import Json.Encode exposing (encode, object)
+import LocalStorage
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (height, id, width, x, y)
@@ -52,7 +53,12 @@ initialModel =
 
 init : () -> ( Model, Cmd Msg )
 init x =
-    ( initialModel, WebSocket.connect "ws://localhost:8080" [] )
+    ( initialModel
+    , Cmd.batch
+        [ LocalStorage.checkForLocalName ()
+        , WebSocket.connect "ws://localhost:8080" []
+        ]
+    )
 
 
 
@@ -66,6 +72,7 @@ type Msg
     | SelectSeat
     | RandomInt Int
     | SocketConnect WebSocket.ConnectionInfo
+    | FoundAlreadyEnteredName String
     | NOOP
 
 
@@ -118,12 +125,14 @@ update message model =
             ( { model | myName = Just typings }, Cmd.none )
 
         ( SelectSeat, _ ) ->
-            case model.myName of
-                Just playerName ->
-                    ( model, sendSeat playerName )
+            selectSeatUpdate model
 
-                Nothing ->
-                    ( model, Cmd.none )
+        ( FoundAlreadyEnteredName nameFromStorage, _ ) ->
+            let
+                updatedModel =
+                    { model | myName = Just nameFromStorage }
+            in
+            ( model, sendSeat nameFromStorage )
 
         ( RandomInt randy, Just myIdx ) ->
             let
@@ -137,6 +146,20 @@ update message model =
 
         ( _, _ ) ->
             ( Debug.log "HERE BE DEMONS" model, Cmd.none )
+
+
+selectSeatUpdate model =
+    case model.myName of
+        Just playerName ->
+            ( model
+            , Cmd.batch
+                [ sendSeat playerName
+                , LocalStorage.updateNameInStorage playerName
+                ]
+            )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 addCardsToDealt : Model -> Int -> Model
@@ -421,6 +444,13 @@ getNextTurn current totalPlayers =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
+    Sub.batch
+        [ LocalStorage.fromLocalStorage FoundAlreadyEnteredName
+        , webSocketSubs
+        ]
+
+
+webSocketSubs =
     WebSocket.events
         (\event ->
             case event of
