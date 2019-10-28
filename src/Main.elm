@@ -92,7 +92,7 @@ update message model =
         ( Incoming payload, _ ) ->
             let
                 ignoreMe =
-                    Debug.log payload 1
+                    Debug.log "incoming from server!" payload
             in
             ( handleIncoming payload model playerCount, Cmd.none )
 
@@ -128,11 +128,16 @@ update message model =
             selectSeatUpdate model
 
         ( FoundAlreadyEnteredName nameFromStorage, _ ) ->
-            let
-                updatedModel =
-                    { model | myName = Just nameFromStorage }
-            in
-            ( model, sendSeat nameFromStorage )
+            case model.socketInfo of
+                Connected _ ->
+                    ( { model | myName = Just nameFromStorage }
+                    , sendSeat nameFromStorage
+                    )
+
+                _ ->
+                    ( { model | myName = Just nameFromStorage }
+                    , Cmd.none
+                    )
 
         ( RandomInt randy, Just myIdx ) ->
             let
@@ -142,7 +147,16 @@ update message model =
             ( newModel, sendDeal newModel.dealt myIdx )
 
         ( SocketConnect socketInfo, _ ) ->
-            ( { model | socketInfo = Connected socketInfo }, Cmd.none )
+            let
+                updatedCmd =
+                    case model.myName of
+                        Just name ->
+                            sendSeat name
+
+                        Nothing ->
+                            Cmd.none
+            in
+            ( { model | socketInfo = Connected socketInfo }, updatedCmd )
 
         ( _, _ ) ->
             ( Debug.log "HERE BE DEMONS" model, Cmd.none )

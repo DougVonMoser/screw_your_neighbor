@@ -19,7 +19,9 @@ bind(app)
 app.ports.checkForLocalName.subscribe(() => {
     let myName = sessionStorage.getItem('myName')
     console.log('checked sessionStorage for myName, found:', myName)
-    app.ports.fromLocalStorage.send(myName)
+    if(myName) {
+        app.ports.fromLocalStorage.send(myName)
+    }
 })
 
 app.ports.updateNameInStorage.subscribe((name) => {
